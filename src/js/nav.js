@@ -71,6 +71,13 @@ const Nav = (() => {
     }
   }
 
+  // Jellyfin-style edge-geometry spatial nav.
+  // direction: 'left'|'right'|'up'|'down' → 0|1|2|3.
+  function intersects(a1, a2, b1, b2) {
+    return (b1 >= a1 && b1 <= a2) || (b2 >= a1 && b2 <= a2) ||
+           (a1 >= b1 && a1 <= b2) || (a2 >= b1 && a2 <= b2);
+  }
+
   function move(direction) {
     if (moveOverride && focusEl) {
       try { if (moveOverride(direction, focusEl)) return; } catch (e) {}
@@ -79,28 +86,49 @@ const Nav = (() => {
     if (!all.length) return;
     if (!focusEl || all.indexOf(focusEl) < 0) { focus(all[0]); return; }
 
-    const cr = rect(focusEl);
-    const cx = cr.left + cr.width / 2;
-    const cy = cr.top + cr.height / 2;
+    const dirIdx = { left: 0, right: 1, up: 2, down: 3 }[direction];
+    const r = rect(focusEl);
+    const p1x = r.left;
+    const p1y = r.top;
+    const p2x = r.left + r.width - 1;
+    const p2y = r.top + r.height - 1;
+    const sMidX = r.left + r.width / 2;
+    const sMidY = r.top + r.height / 2;
 
-    let best = null, bestScore = Infinity;
+    let best = null;
+    let minDist = Infinity;
+
     for (let i = 0; i < all.length; i++) {
-      const el = all[i];
-      if (el === focusEl) continue;
-      const r = rect(el);
-      const ex = r.left + r.width / 2;
-      const ey = r.top + r.height / 2;
-      const dx = ex - cx, dy = ey - cy;
+      const c = all[i];
+      if (c === focusEl) continue;
+      const er = rect(c);
+      if (!er.width && !er.height) continue;
 
-      if (direction === 'up'    && dy >= -2) continue;
-      if (direction === 'down'  && dy <=  2) continue;
-      if (direction === 'left'  && dx >= -2) continue;
-      if (direction === 'right' && dx <=  2) continue;
+      // Direction filter by element edges (not centers)
+      switch (dirIdx) {
+        case 0: if (er.left >= r.left || er.right === r.right) continue; break;
+        case 1: if (er.right <= r.right || er.left === r.left) continue; break;
+        case 2: if (er.top >= r.top || er.bottom >= r.bottom) continue; break;
+        case 3: if (er.bottom <= r.bottom || er.top <= r.top) continue; break;
+      }
 
-      const primary = (direction === 'up' || direction === 'down') ? Math.abs(dy) : Math.abs(dx);
-      const perp    = (direction === 'up' || direction === 'down') ? Math.abs(dx) : Math.abs(dy);
-      const score   = primary + perp * 0.4;
-      if (score < bestScore) { bestScore = score; best = el; }
+      const x = er.left;
+      const y = er.top;
+      const x2 = x + er.width - 1;
+      const y2 = y + er.height - 1;
+      const ix = intersects(p1x, p2x, x, x2);
+      const iy = intersects(p1y, p2y, y, y2);
+      const midX = er.left + er.width / 2;
+      const midY = er.top + er.height / 2;
+      let dx, dy;
+      switch (dirIdx) {
+        case 0: dx = Math.abs(p1x - Math.min(p1x, x2)); dy = iy ? 0 : Math.abs(sMidY - midY); break;
+        case 1: dx = Math.abs(p2x - Math.max(p2x, x));  dy = iy ? 0 : Math.abs(sMidY - midY); break;
+        case 2: dy = Math.abs(p1y - Math.min(p1y, y2)); dx = ix ? 0 : Math.abs(sMidX - midX); break;
+        case 3: dy = Math.abs(p2y - Math.max(p2y, y));  dx = ix ? 0 : Math.abs(sMidX - midX); break;
+      }
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < minDist) { minDist = d; best = c; }
     }
     if (best) focus(best);
   }
@@ -110,25 +138,35 @@ const Nav = (() => {
     const map = { 38: 'up', 40: 'down', 37: 'left', 39: 'right' };
     if (map[code]) {
       // Jellyfin model:
-      //   LEFT (37) / RIGHT (39) — pass through if a text input is focused so
-      //     the cursor can move.  The user presses DOWN to leave the input.
-      //   UP (38) / DOWN (40)   — always spatial-navigate, even from inputs.
-      // This is exactly how jellyfin-web/keyboardNavigation.js works.
+      //   LEFT/RIGHT — if text input focused, let browser move caret.
+      //   UP/DOWN   — always spatial-nav (blurs input on focus()).
       if ((code === 37 || code === 39) && isTextInput(e.target)) {
-        return; // let browser handle cursor movement
+        return;
       }
       e.preventDefault();
+      e.stopPropagation();
       move(map[code]);
       return;
     }
     if (code === 13) {
-      if (focusEl && focusEl.tagName !== 'INPUT' && focusEl.tagName !== 'TEXTAREA') {
+      // Enter on text input → commit + leave field, then move down into results.
+      if (isTextInput(e.target)) {
+        e.preventDefault();
+        try { e.target.dispatchEvent(new Event('change', { bubbles: true })); } catch (_) {}
+        try { e.target.blur(); } catch (_) {}
+        invalidateCache();
+        setTimeout(() => move('down'), 60);
+        return;
+      }
+      if (focusEl) {
         e.preventDefault();
         focusEl.click();
       }
       return;
     }
     if (code === 10009 || code === 27) {
+      // Tizen back / Esc — also blur any focused input so it doesn't swallow.
+      if (isTextInput(e.target)) { try { e.target.blur(); } catch (_) {} }
       if (backHandler) { e.preventDefault(); backHandler(); }
     }
   }
