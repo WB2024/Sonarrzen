@@ -44,13 +44,13 @@ eUQ1eYiccA==</DigestValue>
 </Reference>
 <Reference URI="js%2Fapp.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>CqmJ+Nc0b2mv3Dmt7Jk4K1bG8FfELXvbaTAiQRzxtJ93/pDnbnSRPGQiSY0kCoqvyazkKEMtd1cG
-+Ei3SZyQgw==</DigestValue>
+<DigestValue>sBkXLqcnwT2Tsesd9WSJbfchGxpsgUDvWeV6eanpl5IdRpMnHZlCvNAD/nhabQe5toR/ZgnHVA/k
+T3nsPN5tEg==</DigestValue>
 </Reference>
 <Reference URI="js%2Fcomponents%2Fheader.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
-<DigestValue>rJw1u4LXgQKdnOyoPjgqQ+8ywGlEK1sEkqT9VoNEG0pYQqkD+y/ZOXP57ACT4Kg7cswKz2243LX/
-7xYEPJMa0A==</DigestValue>
+<DigestValue>AcDCMpSUf8hS12lNh0m5C+WpmXDoSOHNtZiYrpGXRu2/4Cmg5DgoZErRyBlq9GuSIhk0osz7qcFn
+9Eb425zS7A==</DigestValue>
 </Reference>
 <Reference URI="js%2Fcomponents%2Fspinner.js">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"></DigestMethod>
@@ -117,9 +117,9 @@ QY10fG1EWQ==</DigestValue>
 </Reference>
 </SignedInfo>
 <SignatureValue>
-N2KxWlulxT6RSS28J9FLwPF1Qcnph5YXCDLhK+SN8xfzjoQqEuQ0BhppDLdOVwNdE8TaLxnqnCS7
-lHNmiWnuxJ6U/PDk5Vv1ZROB9vnQXf+4TtFwmx0dly4Tl6I45X6Ujj9suQKGUIKlFHb6QvQIwWe8
-PbOlNdEDqc3NtAUPE3E=
+Qyfem16r6oRqG0aAGdfXc+8BsSzRJEvEgYf7aZSK3lfSQK9AfawsTnuqTOLDPm+Yg+tLIkUt8RtZ
+ja7kUKLoE1CtU7q7KFtMecqBJ7Uv+KprSYd1OTjefVQBvEn2aJxMzAQ9cu9fmWFZXYz5WUjeSj2G
+r66XcV4WiCYYO94+IpE=
 </SignatureValue>
 <KeyInfo>
 <X509Data>
