@@ -1,4 +1,6 @@
 // screens/setup.js — First-run config (URL + API key)
+const APP_VERSION = '1.1.0';
+
 const SetupScreen = (() => {
   function render(host) {
     host.innerHTML = '';
@@ -12,7 +14,7 @@ const SetupScreen = (() => {
 
     card.innerHTML = `
       <h1>Sonarr</h1>
-      <p class="lead">Connect to your Sonarr server to manage your TV library.</p>
+      <p class="lead" style="display:flex;justify-content:space-between;align-items:baseline;">Connect to your Sonarr server to manage your TV library.<span style="font-size:12px;color:var(--muted);">v${APP_VERSION}</span></p>
       <div class="field">
         <label for="s-url">Sonarr URL</label>
         <input id="s-url" class="input" type="text" data-nav
@@ -27,8 +29,10 @@ const SetupScreen = (() => {
                value="${escapeHtml(cfg.apiKey || '')}">
         <div class="hint">Find this in Sonarr → Settings → General → API Key.</div>
       </div>
-      <div style="display:flex;gap:16px;margin-top:24px;">
+      <div style="display:flex;gap:16px;margin-top:24px;flex-wrap:wrap;">
         <button id="s-connect" class="btn btn-primary" data-nav>Connect</button>
+        <button id="s-clear-cache" class="btn" data-nav>Clear Cache</button>
+        <button id="s-disconnect" class="btn btn-danger" data-nav>Disconnect</button>
       </div>
       <div id="s-status" style="margin-top:20px;color:var(--muted);font-size:15px;"></div>
     `;
@@ -61,6 +65,18 @@ const SetupScreen = (() => {
     }
 
     $btn.addEventListener('click', tryConnect);
+
+    document.getElementById('s-clear-cache').addEventListener('click', () => {
+      try { localStorage.removeItem('sonarrzen-series-v1'); } catch (e) {}
+      Store.state.series = [];
+      Store.state.seriesLoadedAt = 0;
+      Toast.show('Cache cleared', 'success');
+    });
+
+    document.getElementById('s-disconnect').addEventListener('click', () => {
+      Store.clearConfig();
+      App.navigate('setup');
+    });
 
     $url.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) { e.preventDefault(); Nav.focus($key); }
