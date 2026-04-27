@@ -89,6 +89,10 @@ const App = (() => {
       navigate('detail', { seriesId: Store.state.selectedSeriesId });
       return;
     }
+    if (cur === 'setup' && Store.state.config) {
+      navigate('library');
+      return;
+    }
     if (cur === 'detail' || cur === 'search' || cur === 'queue') {
       navigate('library');
       return;

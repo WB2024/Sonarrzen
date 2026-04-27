@@ -1,15 +1,16 @@
 // header.js — Top navigation bar (Sonarr)
 const Header = (() => {
   const TABS = [
-    { id: 'library', label: 'Library' },
-    { id: 'search',  label: 'Search'  },
-    { id: 'queue',   label: 'Queue'   },
+    { id: 'library', label: 'Library'  },
+    { id: 'search',  label: 'Search'   },
+    { id: 'queue',   label: 'Queue'    },
+    { id: 'setup',   label: 'Settings' },
   ];
 
   function render(currentScreen) {
     const host = document.getElementById('header');
     if (!host) return;
-    if (currentScreen === 'setup') { host.innerHTML = ''; return; }
+    if (currentScreen === 'setup' && !Store.state.config) { host.innerHTML = ''; return; }
 
     host.innerHTML = '';
     const brand = document.createElement('div');
