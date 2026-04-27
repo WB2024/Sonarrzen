@@ -11,4 +11,7 @@
 //     apiKey: 'your-key-here',
 //     sawsubeUrl: 'http://localhost:8000'
 //   }));
+//
+// TMDB_API_KEY is replaced at build time by build.sh when TMDB_API_KEY env is set.
+var TMDB_API_KEY = '__TMDB_API_KEY__';
 (function(){})();

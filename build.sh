@@ -18,6 +18,15 @@ fi
 echo "→ Cleaning old WGT..."
 rm -f "$SRC_DIR"/*.wgt "$OUT"
 
+# Inject TMDB_API_KEY into sawsube-config.js (restore on exit)
+CFG="$SRC_DIR/js/sawsube-config.js"
+if [[ -n "${TMDB_API_KEY:-}" && -f "$CFG" ]]; then
+  cp "$CFG" "$CFG.bak"
+  trap 'mv -f "$CFG.bak" "$CFG" 2>/dev/null || true' EXIT
+  sed -i "s|__TMDB_API_KEY__|${TMDB_API_KEY}|g" "$CFG"
+  echo "→ TMDB key injected."
+fi
+
 echo "→ Packaging WGT (profile: $PROFILE)..."
 "$TIZEN" package --type wgt --sign "$PROFILE" -- "$SRC_DIR"
 

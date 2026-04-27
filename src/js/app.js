@@ -6,7 +6,8 @@ const App = (() => {
     detail:  typeof DetailScreen  !== 'undefined' ? DetailScreen  : null,
     season:  typeof SeasonScreen  !== 'undefined' ? SeasonScreen  : null,
     search:  typeof SearchScreen  !== 'undefined' ? SearchScreen  : null,
-    queue:   typeof QueueScreen   !== 'undefined' ? QueueScreen   : null,
+    queue:    typeof QueueScreen    !== 'undefined' ? QueueScreen    : null,
+    discover: typeof DiscoverScreen !== 'undefined' ? DiscoverScreen : null,
   };
 
   let currentTeardown = null;
@@ -93,7 +94,7 @@ const App = (() => {
       navigate('library');
       return;
     }
-    if (cur === 'detail' || cur === 'search' || cur === 'queue') {
+    if (cur === 'detail' || cur === 'search' || cur === 'queue' || cur === 'discover') {
       navigate('library');
       return;
     }

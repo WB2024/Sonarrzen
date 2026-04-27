@@ -396,3 +396,39 @@ h3 { font-size: 22px; font-weight: 500; }
 .ep-status.ok { color: var(--ok); }
 .ep-status.warn { color: var(--warn); }
 .ep-status.missing { color: var(--err); }
+
+
+/* ---------- Discovery / TMDB ---------- */
+.similar-section { padding: 0 0 32px; }
+.similar-rail {
+  display: flex; gap: 16px; overflow-x: auto; padding: 0 32px 16px;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+}
+.similar-rail::-webkit-scrollbar { display: none; }
+.rail-card {
+  flex: 0 0 200px; scroll-snap-align: start; cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.rail-card.nav-focused { transform: scale(1.05); }
+.rail-card .poster-wrap {
+  position: relative; border-radius: 8px; overflow: hidden; background: #1a1a1a;
+}
+.rail-card .poster-wrap img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.2s; }
+.rail-card .title {
+  font-size: 14px; margin-top: 8px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.discover-screen { padding: 24px 32px; }
+.discover-tabs { display: flex; gap: 12px; margin-bottom: 16px; }
+.genre-pills {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+  max-height: 96px; overflow-y: auto;
+}
+.pill {
+  background: #1a1a1a; color: var(--text); border: 1px solid #2a2a2a;
+  border-radius: 999px; padding: 8px 16px; cursor: pointer; font-size: 14px;
+}
+.pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pill.nav-focused { outline: 2px solid #fff; outline-offset: 2px; }
+

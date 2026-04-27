@@ -22,9 +22,86 @@ const DetailScreen = (() => {
     SonarrAPI.series.get(id).then(full => {
       enrichDetail(full || slim);
       renderSeasonGrid(full || slim);
+      loadSimilar(full || slim);
     }).catch(() => {
       renderSeasonGrid(slim);
+      loadSimilar(slim);
     });
+  }
+
+  function loadSimilar(s) {
+    const host = document.getElementById('d-similar');
+    if (!host || !s || !s.tvdbId) return;
+    if (typeof TMDB === 'undefined' || !TMDB.hasKey()) return;
+    TMDB.resolveToTmdbId(s.tvdbId).then(tmdbId => {
+      if (!tmdbId) return null;
+      return TMDB.tv.recommendations(tmdbId).then(d => {
+        let r = (d && d.results) || [];
+        if (r.length) return r;
+        return TMDB.tv.similar(tmdbId).then(d2 => (d2 && d2.results) || []);
+      });
+    }).then(list => {
+      list = (list || []).slice(0, 12);
+      if (!list.length) { host.style.display = 'none'; return; }
+      renderSimilarRail(host, list);
+    }).catch(() => { host.style.display = 'none'; });
+  }
+
+  function renderSimilarRail(host, results) {
+    host.style.display = 'block';
+    host.innerHTML = '<h2 style="margin:24px 32px 12px;">You might also like</h2>' +
+                     '<div class="similar-rail" id="d-rail"></div>';
+    const rail = document.getElementById('d-rail');
+    results.forEach(r => rail.appendChild(similarCard(r)));
+    Nav.invalidateCache();
+  }
+
+  function similarCard(r) {
+    const el = document.createElement('div');
+    el.className = 'rail-card';
+    el.dataset.nav = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'poster-wrap';
+    wrap.style.height = '300px';
+    const ph = document.createElement('div');
+    ph.className = 'poster-placeholder';
+    ph.textContent = r.name || '';
+    wrap.appendChild(ph);
+    const purl = TMDB.posterUrl(r.poster_path);
+    if (purl) {
+      const img = document.createElement('img');
+      img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+      img.style.opacity = '0';
+      img.onload = () => { img.style.opacity = '1'; ph.style.display = 'none'; };
+      img.onerror = () => { img.remove(); };
+      img.src = purl;
+      wrap.appendChild(img);
+    }
+    el.appendChild(wrap);
+    const t = document.createElement('div');
+    t.className = 'title';
+    const yr = (r.first_air_date || '').slice(0, 4);
+    t.textContent = yr ? (r.name + ' (' + yr + ')') : r.name;
+    el.appendChild(t);
+    el.addEventListener('click', () => {
+      // TMDB result → external_ids → tvdbId → Sonarr lookup → add overlay
+      Toast.show('Looking up…', 'info');
+      TMDB.tv.externalIds(r.id).then(ids => {
+        const tvdbId = ids && ids.tvdb_id;
+        if (!tvdbId) throw new Error('No TVDB ID for this show');
+        const found = Store.state.series.find(x => x.tvdbId === tvdbId);
+        if (found) { App.navigate('detail', { seriesId: found.id }); return null; }
+        return SonarrAPI.lookup.tvdb(tvdbId);
+      }).then(lr => {
+        if (lr === null) return;
+        const result = Array.isArray(lr) ? lr[0] : lr;
+        if (!result) { Toast.show('Series not found in Sonarr lookup', 'error'); return; }
+        if (typeof SearchScreen !== 'undefined' && SearchScreen.openAddOverlay) {
+          SearchScreen.openAddOverlay(result);
+        } else { Toast.show('Add overlay not available', 'error'); }
+      }).catch(e => Toast.show('Lookup failed: ' + e.message, 'error'));
+    });
+    return el;
   }
 
   function renderShell(host, s) {
@@ -58,7 +135,8 @@ const DetailScreen = (() => {
           '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="season-screen-wrap"><h2 style="margin:8px 32px 0;">Seasons</h2><div class="season-grid" id="season-grid"></div></div>';
+      '<div class="season-screen-wrap"><h2 style="margin:8px 32px 0;">Seasons</h2><div class="season-grid" id="season-grid"></div></div>' +
+      '<section id="d-similar" class="similar-section" style="display:none;"></section>';
     host.appendChild(wrap);
 
     const $img = document.getElementById('d-poster');

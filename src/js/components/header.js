@@ -1,10 +1,11 @@
 // header.js — Top navigation bar (Sonarr)
 const Header = (() => {
   const TABS = [
-    { id: 'library', label: 'Library'  },
-    { id: 'search',  label: 'Search'   },
-    { id: 'queue',   label: 'Queue'    },
-    { id: 'setup',   label: 'Settings' },
+    { id: 'library',  label: 'Library'  },
+    { id: 'discover', label: 'Discover' },
+    { id: 'search',   label: 'Search'   },
+    { id: 'queue',    label: 'Queue'    },
+    { id: 'setup',    label: 'Settings' },
   ];
 
   function render(currentScreen) {
